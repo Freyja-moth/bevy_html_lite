@@ -30,7 +30,7 @@ And also there's color!
 let sections = sections!(<span color = "#5BCEFA"> { "We" } </span> <span color = "#F5A9B8"> { "now" } </span> { "have" } <span color = "#F5A9B8"> { "Color" } </span> <span color = "#5BCEFA"> { "!" } </span>)
 ```
 
-> The default color should be set with [DefaultTextColor](https://github.com/Freyja-moth/bevy_html_lite/blob/main/src/plugin.rs#L24)
+> The default color should be set with [DefaultTextColor](https://github.com/Freyja-moth/bevy_html_lite/blob/main/src/plugin.rs#L24) when using DefaultHtmlLiteDisplayPlugin.
 
 ## Plugins
 There is a default plugin called [DefaultHtmlLiteDisplayPlugin](https://github.com/Freyja-moth/bevy_html_lite/blob/main/src/plugin.rs#L34) that uses observer to spawn and despawn text. It largely exists to give users an example on how to use this crate and I would not recommended using it beyond playing around. You should probably create your own implementation for any serious project as what you create will be far more likely to suite you tastes.
