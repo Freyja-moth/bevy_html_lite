@@ -17,7 +17,7 @@ let sections = Sections::from_iter([
 ])
 ```
 
-The macro itself isn't required, but it is strongly recommended as it makes life a lot easier
+> The macro itself isn't required, but it is strongly recommended as it makes life a lot easier
 
 You can even (I hope) do formatting inside the strings
 ```rust
