@@ -27,7 +27,7 @@ let sections = sections!({ "{x}" });
 
 And also there's color!
 ```rust
-let sections = sections!(<span color = "#5BCEFA"> { "We" } </span> <span color = "#F5A9B8""> { "now" } </span> { "have" } <span color = "#F5A9B8"> { "Color" } </span> <span color = "#5BCEFA"> { "!" } </span>)
+let sections = sections!(<span color = "#5BCEFA"> { "We" } </span> <span color = "#F5A9B8"> { "now" } </span> { "have" } <span color = "#F5A9B8"> { "Color" } </span> <span color = "#5BCEFA"> { "!" } </span>)
 ```
 
 > The default color should be set with [DefaultTextColor]
