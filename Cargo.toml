@@ -1,0 +1,13 @@
+[package]
+name = "bevy_html_lite"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+members = [ "html_lite_sections", "html_lite_macros" ]
+
+[dependencies]
+bevy = "0.15.0"
+html_lite_macros = { version = "0.1.0", path = "html_lite_macros" }
+html_lite_sections = { version = "0.1.0", path = "html_lite_sections" }
+itertools = "0.14.0"
