@@ -11,3 +11,7 @@ bevy = "0.15.0"
 html_lite_macros = { version = "0.1.0", path = "html_lite_macros" }
 html_lite_sections = { version = "0.1.0", path = "html_lite_sections" }
 itertools = "0.14.0"
+
+[features]
+default = [ "plugin" ]
+plugin = []

@@ -1,6 +1,8 @@
+#[cfg(feature = "plugin")]
 pub mod plugin;
 
 pub mod prelude {
+    #[cfg(feature = "plugin")]
     pub use crate::plugin::{
         ClearSections, DefaultHtmlLiteDisplayPlugin, DialogueArea, DialogueSection, HtmlLiteFonts,
         PushSections,
