@@ -159,7 +159,7 @@ pub fn sections(input: TokenStream) -> TokenStream {
                 .map(|color| quote! { Some(Color::from(Srgba::hex(#color).unwrap())) })
                 .unwrap_or(quote! { None });
             quote! {
-                ::html_lite_sections::prelude::Section::new(std::format!(#string), #bold, #italic, #color)
+                ::bevy_html_lite::prelude::Section::new(std::format!(#string), #bold, #italic, #color)
             }
         })
         .collect();
