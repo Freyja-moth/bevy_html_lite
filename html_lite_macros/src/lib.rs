@@ -164,7 +164,7 @@ pub fn sections(input: TokenStream) -> TokenStream {
         })
         .collect();
     quote! {
-        ::html_lite_sections::prelude::Sections::from_iter([#(#values),*])
+        ::bevy_html_lite::prelude::Sections::from_iter([#(#values),*])
     }
     .into()
 }
