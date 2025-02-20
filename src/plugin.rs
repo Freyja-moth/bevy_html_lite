@@ -23,6 +23,14 @@ pub struct HtmlLiteFonts {
 #[derive(Resource, Default)]
 pub struct DefaultTextColor(Color);
 
+#[derive(Resource)]
+pub struct DefaultFontSize(f32);
+impl Default for DefaultFontSize {
+    fn default() -> Self {
+        Self(20.)
+    }
+}
+
 #[derive(Event, Reflect, Debug)]
 pub struct PushSections(Sections);
 
@@ -44,13 +52,14 @@ impl Plugin for DefaultHtmlLiteDisplayPlugin {
 
 // Am I aware that this is a mess, yes, yes I am. Why haven't I fixed it? Tired.
 fn push_sections(
-    sections: Trigger<PushSections>,
+    mut sections: Trigger<PushSections>,
     mut commands: Commands,
     fonts: Res<HtmlLiteFonts>,
     text_color: Res<DefaultTextColor>,
-    dialogue: Query<Entity, With<DialogueArea>>,
+    font_size: Res<DefaultFontSize>,
+    dialogue: Single<Entity, With<DialogueArea>>,
 ) {
-    let area = dialogue.single();
+    let area = dialogue.into_inner();
 
     let regular = fonts.regular.clone();
     let bold = fonts.bold.clone();
@@ -58,17 +67,17 @@ fn push_sections(
     let bold_italic = fonts.bold_italic.clone();
 
     let sections = sections
-        .event()
+        .event_mut()
         .0
-        .iter()
-        .cloned()
+         .0
+        .iter_mut()
         .map(|section| {
-            commands
+            let snippet = commands
                 .spawn((
                     Node {
                         ..Default::default()
                     },
-                    Text::new(section.value),
+                    Text::new(section.value.clone()),
                     TextColor(section.color.unwrap_or(text_color.0)),
                     TextFont {
                         font: if section.italic && section.bold {
@@ -80,11 +89,29 @@ fn push_sections(
                         } else {
                             regular.clone()
                         },
+                        font_size: font_size.0,
                         ..Default::default()
                     },
                     DialogueSection,
                 ))
-                .id()
+                .id();
+
+            // I'm not overly pleased with the but since observers don't implement Clone this is
+            // really the only way to do it as far as I know
+            if let Some(mut over) = section.over.take() {
+                over.watch_entity(snippet);
+                commands.spawn(over);
+            }
+            if let Some(mut out) = section.out.take() {
+                out.watch_entity(snippet);
+                commands.spawn(out);
+            }
+            if let Some(mut click) = section.click.take() {
+                click.watch_entity(snippet);
+                commands.spawn(click);
+            }
+
+            snippet
         })
         .collect_vec();
 
