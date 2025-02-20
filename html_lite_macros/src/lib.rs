@@ -3,12 +3,12 @@ use quote::quote;
 use syn::{
     braced,
     parse::{Parse, ParseStream},
-    parse_macro_input, Ident, LitInt, LitStr, Token,
+    parse_macro_input, Ident, LitFloat, LitStr, Token,
 };
 
 enum Attribute {
     Color(LitStr),
-    FontSize(LitInt),
+    FontSize(LitFloat),
     Over(Ident),
     Out(Ident),
     Click(Ident),
@@ -91,7 +91,7 @@ struct Section {
     bold: bool,
     italic: bool,
     color: Option<LitStr>,
-    font_size: Option<LitInt>,
+    font_size: Option<LitFloat>,
     over: Option<Ident>,
     out: Option<Ident>,
     click: Option<Ident>,
