@@ -192,10 +192,10 @@ pub fn sections(input: TokenStream) -> TokenStream {
             let bold = value.bold;
             let italic = value.italic;
 
-            let color = value.color.map(|color| quote!{ section.set_color(::bevy::prelude::Color(::bevy::prelude::Srbga::hex(#color))) });
-            let font_size = value.font_size.map(|font_size| quote!{ section.set_font_size(#font_size) });
-            let over = value.over.map(|over| quote!{ section.set_over(#over) });
-            let out = value.out.map(|out| quote!{ section.set_out(#out) });
+            let color = value.color.map(|color| quote!{ section.set_color(::bevy::prelude::Color(::bevy::prelude::Srbga::hex(#color))); });
+            let font_size = value.font_size.map(|font_size| quote!{ section.set_font_size(#font_size); });
+            let over = value.over.map(|over| quote!{ section.set_over(#over); });
+            let out = value.out.map(|out| quote!{ section.set_out(#out); });
             let click = value.click.map(|click| quote!{ section.set_click(#click); });
 
             quote! {
