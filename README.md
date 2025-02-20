@@ -1,8 +1,6 @@
 # HTML LITE
 Like html, but only for text.
 
-This is intended to be used with the bevy game engine, but there's nothing to say you can't take advantage of this for your own aims (unless those aims are nefarious in nature).
-
 Sections can be created by using the sections macro.
 
 ```rust
