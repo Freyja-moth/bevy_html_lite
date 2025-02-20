@@ -120,7 +120,7 @@ impl Parse for Sections {
                         _ => {}
                     }
 
-                    if let Some(attribute) = attributes.pop() {
+                    while let Some(attribute) = attributes.pop() {
                         match attribute {
                             Attribute::Color(new_color) => {
                                 color.replace(new_color);
