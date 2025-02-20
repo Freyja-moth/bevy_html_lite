@@ -3,31 +3,39 @@ use quote::quote;
 use syn::{
     braced,
     parse::{Parse, ParseStream},
-    parse_macro_input, Ident, LitStr, Token,
+    parse_macro_input, Ident, LitInt, LitStr, Token,
 };
 
-#[derive(Debug)]
-struct Attribute {
-    key: Ident,
-    value: LitStr,
+enum Attribute {
+    Color(LitStr),
+    FontSize(LitInt),
+    Over(Ident),
+    Out(Ident),
+    Click(Ident),
 }
 impl Parse for Attribute {
     fn parse(input: ParseStream) -> syn::Result<Self> {
-        let key = input.parse()?;
-        input.parse::<Token![=]>()?;
-        let value = input.parse()?;
+        let name: Ident = input.parse()?;
 
-        Ok(Self { key, value })
+        input.parse::<Token![=]>()?;
+
+        match name.to_string().as_str() {
+            "color" => Ok(Self::Color(input.parse()?)),
+            "font_size" => Ok(Self::FontSize(input.parse()?)),
+            "over" => Ok(Self::Over(input.parse()?)),
+            "out" => Ok(Self::Out(input.parse()?)),
+            "click" => Ok(Self::Click(input.parse()?)),
+            _ => Err(syn::Error::new(input.span(), "Unrecognised attribute")),
+        }
     }
 }
 
-#[derive(Debug)]
 enum Tag {
-    Start(Vec<Attribute>, Ident),
+    Start(Ident, Vec<Attribute>),
     End(Ident),
 }
 impl Parse for Tag {
-    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
         input.parse::<Token![<]>()?;
 
         let end = input.parse::<Token![/]>().is_ok();
@@ -46,15 +54,14 @@ impl Parse for Tag {
         if end {
             Ok(Self::End(tag))
         } else {
-            Ok(Self::Start(attributes, tag))
+            Ok(Self::Start(tag, attributes))
         }
     }
 }
 
-#[derive(Debug)]
 struct Text(LitStr);
 impl Parse for Text {
-    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
         let b;
         braced!(b in input);
 
@@ -62,28 +69,32 @@ impl Parse for Text {
     }
 }
 
-#[derive(Debug)]
 enum Value {
     Text(Text),
     Tag(Tag),
 }
 impl Parse for Value {
-    fn parse(input: syn::parse::ParseStream) -> syn::Result<Self> {
+    fn parse(input: ParseStream) -> syn::Result<Self> {
         if let Ok(text) = input.parse() {
-            Ok(Value::Text(text))
+            Ok(Self::Text(text))
         } else if let Ok(tag) = input.parse() {
-            Ok(Value::Tag(tag))
+            Ok(Self::Tag(tag))
         } else {
             Err(syn::Error::new(input.span(), "Section could not be parsed"))
         }
     }
 }
 
+#[derive(Clone)]
 struct Section {
-    value: LitStr,
-    italic: bool,
+    text: LitStr,
     bold: bool,
+    italic: bool,
     color: Option<LitStr>,
+    font_size: Option<LitInt>,
+    over: Option<Ident>,
+    out: Option<Ident>,
+    click: Option<Ident>,
 }
 
 struct Sections(Vec<Section>);
@@ -95,23 +106,39 @@ impl Parse for Sections {
         let mut italic = false;
         let mut bold = false;
         let mut color = None;
+        let mut font_size = None;
+        let mut over = None;
+        let mut out = None;
+        let mut click = None;
+
         while let Ok(value) = input.parse::<Value>() {
             match value {
-                Value::Tag(Tag::Start(mut attribute, start_tag)) => {
+                Value::Tag(Tag::Start(start_tag, mut attributes)) => {
                     match start_tag.to_string().as_str() {
                         "i" => italic = true,
                         "b" => bold = true,
                         _ => {}
                     }
 
-                    if let Some(Attribute { key, value }) = attribute.pop() {
-                        if key == "color" {
-                            color.replace(value);
-                        }
-                    } else {
-                        color = None;
+                    if let Some(attribute) = attributes.pop() {
+                        match attribute {
+                            Attribute::Color(new_color) => {
+                                color.replace(new_color);
+                            }
+                            Attribute::FontSize(new_size) => {
+                                font_size.replace(new_size);
+                            }
+                            Attribute::Over(new_over) => {
+                                over.replace(new_over);
+                            }
+                            Attribute::Out(new_out) => {
+                                out.replace(new_out);
+                            }
+                            Attribute::Click(new_click) => {
+                                click.replace(new_click);
+                            }
+                        };
                     }
-
                     tags.push(start_tag.to_string());
                 }
                 Value::Tag(Tag::End(end_tag)) => {
@@ -127,13 +154,23 @@ impl Parse for Sections {
                         "b" => bold = false,
                         _ => {}
                     }
+
+                    color.take();
+                    font_size.take();
+                    over.take();
+                    out.take();
+                    click.take();
                 }
-                Value::Text(Text(value)) => {
+                Value::Text(Text(text)) => {
                     values.push(Section {
-                        value,
+                        text,
                         italic,
                         bold,
                         color: color.clone(),
+                        font_size: font_size.clone(),
+                        over: over.clone(),
+                        out: out.clone(),
+                        click: click.clone(),
                     });
                 }
             }
@@ -145,24 +182,38 @@ impl Parse for Sections {
 
 #[proc_macro]
 pub fn sections(input: TokenStream) -> TokenStream {
-    let values = parse_macro_input!(input as Sections);
+    let sections = parse_macro_input!(input as Sections);
 
-    let values: Vec<_> = values
+    let values: Vec<_> = sections
         .0
         .into_iter()
         .map(|value| {
-            let string = value.value;
+            let string = value.text;
             let bold = value.bold;
             let italic = value.italic;
-            let color = value
-                .color
-                .map(|color| quote! { Some(Color::from(Srgba::hex(#color).unwrap())) })
-                .unwrap_or(quote! { None });
+
+            let color = value.color.map(|color| quote!{ section.set_color(::bevy::prelude::Color(::bevy::prelude::Srbga::hex(#color))) });
+            let font_size = value.font_size.map(|font_size| quote!{ section.set_font_size(#font_size) });
+            let over = value.over.map(|over| quote!{ section.set_over(#over) });
+            let out = value.out.map(|out| quote!{ section.set_out(#out) });
+            let click = value.click.map(|click| quote!{ section.set_click(#click); });
+
             quote! {
-                ::bevy_html_lite::prelude::Section::new(std::format!(#string), #bold, #italic, #color)
+                {
+                    let mut section = ::bevy_html_lite::prelude::Section::new(std::format!(#string), #bold, #italic);
+
+                    #color
+                    #font_size
+                    #over
+                    #out
+                    #click
+
+                    section
+                }
             }
         })
         .collect();
+
     quote! {
         ::bevy_html_lite::prelude::Sections::from_iter([#(#values),*])
     }
