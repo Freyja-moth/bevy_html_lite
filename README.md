@@ -1,8 +1,6 @@
 # HTML LITE
 Like html, but only for text.
 
-This is intended to be used with the bevy game engine, but there's nothing to say you can't take advantage of this for your own aims (unless those aims are nefarious in nature).
-
 Sections can be created by using the sections macro.
 
 ```rust
@@ -37,7 +35,6 @@ There is a default plugin called [DefaultHtmlLiteDisplayPlugin](https://github.c
 
 ### Implemented stuff 
 Currently the only implemented tags are `<i>` and `<b>`. You can still use other tags (which is useful for colors), they simply won't have any special effects (for now).
-The only attribute available at the moment is color.
 
 ### Things yet to do
 For the time being you can't load parse from a file due to the way the macro works.
