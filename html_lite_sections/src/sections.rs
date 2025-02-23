@@ -1,4 +1,5 @@
-use std::fmt::Debug;
+use std::vec::IntoIter;
+use std::{fmt::Debug, slice};
 
 use bevy::{ecs::system::IntoObserverSystem, prelude::*};
 
@@ -43,6 +44,11 @@ impl Section {
             ..Default::default()
         }
     }
+
+    // pub fn with_marker(mut self, marker: impl Component) -> Self {
+    // self.marker = Box::new(marker);
+    // self
+    // }
     pub fn with_color(mut self, color: Color) -> Self {
         self.color = Some(color);
         self
@@ -64,6 +70,10 @@ impl Section {
         self
     }
 
+    // pub fn set_marker(&mut self, marker: impl Component) -> &mut Self {
+    // self.marker = Box::new(marker);
+    // self
+    // }
     pub fn set_color(&mut self, color: Color) -> &mut Self {
         self.color = Some(color);
         self
@@ -122,6 +132,13 @@ pub struct Sections(pub Vec<Section>);
 impl FromIterator<Section> for Sections {
     fn from_iter<T: IntoIterator<Item = Section>>(iter: T) -> Self {
         Self(iter.into_iter().collect())
+    }
+}
+impl<'a> IntoIterator for Sections {
+    type Item = Section;
+    type IntoIter = IntoIter<Self::Item>;
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
     }
 }
 impl Sections {
