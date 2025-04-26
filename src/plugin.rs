@@ -21,10 +21,10 @@ pub struct HtmlLiteFonts {
 
 /// The text color to be used when it isn't specified
 #[derive(Resource, Default)]
-pub struct DefaultTextColor(Color);
+pub struct DefaultTextColor(pub Color);
 
 #[derive(Resource)]
-pub struct DefaultFontSize(f32);
+pub struct DefaultFontSize(pub f32);
 impl Default for DefaultFontSize {
     fn default() -> Self {
         Self(20.)
@@ -32,7 +32,12 @@ impl Default for DefaultFontSize {
 }
 
 #[derive(Event, Reflect, Debug)]
-pub struct PushSections(Sections);
+pub struct PushSections(Vec<Section>);
+impl PushSections {
+    pub fn new(value: impl IntoIterator<Item = Section>) -> Self {
+        Self(Vec::from_iter(value))
+    }
+}
 
 #[derive(Event, Reflect, Debug)]
 pub struct ClearSections;
@@ -59,8 +64,6 @@ fn push_sections(
     font_size: Res<DefaultFontSize>,
     dialogue: Single<Entity, With<DialogueArea>>,
 ) {
-    let area = dialogue.into_inner();
-
     let regular = fonts.regular.clone();
     let bold = fonts.bold.clone();
     let italic = fonts.italic.clone();
@@ -69,22 +72,25 @@ fn push_sections(
     let sections = sections
         .event_mut()
         .0
-         .0
         .iter_mut()
         .map(|section| {
+            let is_bold = section.has_tag("b");
+            let is_italic = section.has_tag("i");
+            let color = section.get_attribute::<Color>("color").cloned();
+
             let snippet = commands
                 .spawn((
                     Node {
                         ..Default::default()
                     },
-                    Text::new(section.value.clone()),
-                    TextColor(section.color.unwrap_or(text_color.0)),
+                    Text::new(section.text()),
+                    TextColor(color.unwrap_or(text_color.0)),
                     TextFont {
-                        font: if section.italic && section.bold {
+                        font: if is_italic && is_bold {
                             bold_italic.clone()
-                        } else if section.italic {
+                        } else if is_italic {
                             italic.clone()
-                        } else if section.bold {
+                        } else if is_bold {
                             bold.clone()
                         } else {
                             regular.clone()
@@ -98,15 +104,15 @@ fn push_sections(
 
             // I'm not overly pleased with the but since observers don't implement Clone this is
             // really the only way to do it as far as I know
-            if let Some(mut over) = section.over.take() {
+            if let Some(mut over) = section.take_attribute::<Observer>("over") {
                 over.watch_entity(snippet);
                 commands.spawn(over);
             }
-            if let Some(mut out) = section.out.take() {
+            if let Some(mut out) = section.take_attribute::<Observer>("out") {
                 out.watch_entity(snippet);
                 commands.spawn(out);
             }
-            if let Some(mut click) = section.click.take() {
+            if let Some(mut click) = section.take_attribute::<Observer>("click") {
                 click.watch_entity(snippet);
                 commands.spawn(click);
             }
@@ -115,15 +121,13 @@ fn push_sections(
         })
         .collect_vec();
 
-    commands.entity(area).add_children(sections.as_slice());
+    commands.entity(*dialogue).add_children(sections.as_slice());
 }
 
 fn clear_sections(
     _: Trigger<ClearSections>,
     mut commands: Commands,
-    dialogue: Query<Entity, With<DialogueArea>>,
+    dialogue: Single<Entity, With<DialogueArea>>,
 ) {
-    let area = dialogue.single();
-
-    commands.entity(area).despawn_descendants();
+    commands.entity(*dialogue).despawn_related::<Children>();
 }

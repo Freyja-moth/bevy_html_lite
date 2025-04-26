@@ -1,151 +1,103 @@
-use std::vec::IntoIter;
-use std::{fmt::Debug, slice};
+use std::{any::Any, fmt::Debug};
 
-use bevy::{ecs::system::IntoObserverSystem, prelude::*};
+use bevy::{
+    prelude::{Deref, Observer},
+    reflect::Reflect,
+};
+use std::collections::HashMap;
 
-/// A section describing a snippet of text
+pub enum Attribute {
+    Observer(Observer),
+    String(String),
+}
+
 #[derive(Reflect, Default)]
 pub struct Section {
-    /// The value being displayed
-    pub value: String,
-    /// Whether or not the text should be bold
-    pub bold: bool,
-    /// Whether or not the text should be italic
-    pub italic: bool,
-    /// The color of the text (if specified)
-    pub color: Option<Color>,
-    pub font_size: Option<f32>,
+    text: String,
+    tags: Vec<String>,
     #[reflect(ignore)]
-    pub over: Option<Observer>,
-    #[reflect(ignore)]
-    pub out: Option<Observer>,
-    #[reflect(ignore)]
-    pub click: Option<Observer>,
+    attributes: HashMap<String, Box<dyn Any + Sync + Send>>,
 }
 impl Debug for Section {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let attributes: HashMap<&str, &str> = self
+            .attributes
+            .keys()
+            .map(|name| (name.as_str(), "..."))
+            .collect();
         f.debug_struct("Section")
-            .field("value", &self.value)
-            .field("bold", &self.bold)
-            .field("italic", &self.italic)
-            .field("color", &self.color)
-            .field("over", &"...")
-            .field("out", &"...")
-            .field("click", &"...")
+            .field("text", &self.text)
+            .field("tags", &self.tags)
+            .field("attributes", &attributes)
             .finish()
     }
 }
 impl Section {
-    pub fn new(value: impl Into<String>, bold: bool, italic: bool) -> Self {
+    pub fn new(text: impl Into<String>) -> Self {
         Self {
-            value: value.into(),
-            bold,
-            italic,
-            ..Default::default()
+            text: text.into(),
+            tags: vec![],
+            attributes: HashMap::default(),
         }
     }
-
-    // pub fn with_marker(mut self, marker: impl Component) -> Self {
-    // self.marker = Box::new(marker);
-    // self
-    // }
-    pub fn with_color(mut self, color: Color) -> Self {
-        self.color = Some(color);
+    pub fn with_tag(mut self, tag: impl Into<String>) -> Self {
+        self.tags.push(tag.into());
         self
     }
-    pub fn with_font_size(mut self, font_size: f32) -> Self {
-        self.font_size = Some(font_size);
-        self
-    }
-    pub fn with_over<M>(mut self, over: impl IntoObserverSystem<Pointer<Over>, (), M>) -> Self {
-        self.over = Some(Observer::new(over));
-        self
-    }
-    pub fn with_out<M>(mut self, out: impl IntoObserverSystem<Pointer<Out>, (), M>) -> Self {
-        self.out = Some(Observer::new(out));
-        self
-    }
-    pub fn with_click<M>(mut self, click: impl IntoObserverSystem<Pointer<Click>, (), M>) -> Self {
-        self.click = Some(Observer::new(click));
+    pub fn with_attribute(
+        mut self,
+        name: impl Into<String>,
+        value: impl Any + Sync + Send,
+    ) -> Self {
+        self.attributes.insert(name.into(), Box::new(value));
         self
     }
 
-    // pub fn set_marker(&mut self, marker: impl Component) -> &mut Self {
-    // self.marker = Box::new(marker);
-    // self
-    // }
-    pub fn set_color(&mut self, color: Color) -> &mut Self {
-        self.color = Some(color);
-        self
-    }
-    pub fn set_font_size(&mut self, font_size: f32) -> &mut Self {
-        self.font_size = Some(font_size);
-        self
-    }
-    pub fn set_over<M>(
-        &mut self,
-        over: impl IntoObserverSystem<Pointer<Over>, (), M>,
-    ) -> &mut Self {
-        self.over = Some(Observer::new(over));
-        self
-    }
-    pub fn set_out<M>(&mut self, out: impl IntoObserverSystem<Pointer<Out>, (), M>) -> &mut Self {
-        self.out = Some(Observer::new(out));
-        self
-    }
-    pub fn set_click<M>(
-        &mut self,
-        click: impl IntoObserverSystem<Pointer<Click>, (), M>,
-    ) -> &mut Self {
-        self.click = Some(Observer::new(click));
-        self
+    pub fn text(&self) -> &str {
+        &self.text
     }
 
-    pub fn value(&self) -> &str {
-        &self.value
+    pub fn has_tag(&self, tag: &str) -> bool {
+        self.tags.contains(&tag.into())
     }
-    pub fn is_bold(&self) -> bool {
-        self.bold
+
+    /// Gets an attribute from the section and casts it to [`V`]
+    pub fn get_attribute<V: 'static>(&self, name: &str) -> Option<&V> {
+        self.attributes
+            .get(name)
+            .and_then(|attr| attr.downcast_ref())
     }
-    pub fn is_italic(&self) -> bool {
-        self.italic
-    }
-    pub fn color(&self) -> Option<Color> {
-        self.color
-    }
-    pub fn font_size(&self) -> Option<f32> {
-        self.font_size
-    }
-    pub fn click(&self) -> Option<&Observer> {
-        self.click.as_ref()
-    }
-    pub fn over(&self) -> Option<&Observer> {
-        self.over.as_ref()
-    }
-    pub fn out(&self) -> Option<&Observer> {
-        self.out.as_ref()
+
+    /// Removes an attribute from the section and casts it to an owned value of [`V`].
+    ///
+    /// Useful if you need to have owned access to an attribute that cannot implement clone.
+    pub fn take_attribute<V: 'static>(&mut self, name: &str) -> Option<V> {
+        self.attributes
+            .remove(name)
+            .and_then(|attr| attr.downcast().ok())
+            .map(|attr| *attr)
     }
 }
 
-#[derive(Reflect, Deref, Default, Debug)]
-pub struct Sections(pub Vec<Section>);
+#[derive(Reflect, Debug)]
+pub struct Sections(Vec<Section>);
 impl FromIterator<Section> for Sections {
     fn from_iter<T: IntoIterator<Item = Section>>(iter: T) -> Self {
         Self(iter.into_iter().collect())
     }
 }
-impl<'a> IntoIterator for Sections {
-    type Item = Section;
-    type IntoIter = IntoIter<Self::Item>;
-    fn into_iter(self) -> Self::IntoIter {
-        self.0.into_iter()
-    }
-}
 impl Sections {
-    pub fn new(value: impl IntoIterator<Item = Section>) -> Self {
-        Self::from_iter(value)
+    pub fn new(sections: impl IntoIterator<Item = Section>) -> Self {
+        Self::from_iter(sections)
     }
-    pub fn new_single(value: Section) -> Self {
-        Self::from_iter([value])
+    pub fn new_single(section: Section) -> Self {
+        Self::from_iter([section])
+    }
+
+    pub fn iter(&self) -> impl Iterator<Item = &Section> {
+        self.0.iter()
+    }
+    pub fn iter_mut(&mut self) -> impl Iterator<Item = &mut Section> {
+        self.0.iter_mut()
     }
 }
