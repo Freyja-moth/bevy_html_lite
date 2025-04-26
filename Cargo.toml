@@ -10,7 +10,7 @@ members = [ "html_lite_sections", "html_lite_macros" ]
 bevy = "0.16.0"
 
 [dependencies]
-bevy = "0.16.0"
+bevy = { version = "0.16.0", default-features = false }
 html_lite_macros = { version = "0.1.0", path = "html_lite_macros" }
 html_lite_sections = { version = "0.1.0", path = "html_lite_sections" }
 itertools = "0.14.0"
