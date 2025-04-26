@@ -26,7 +26,10 @@ let sections = sections!({ "{x}" });
 
 And also there's attributes, like color!
 ```rust
-let sections = sections!(<span color = "#5BCEFA"> { "We" } </span> <span color = "#F5A9B8"> { "now" } </span> { "have" } <span color = "#F5A9B8"> { "Color" } </span> <span color = "#5BCEFA"> { "!" } </span>)
+let blue_color = Color::srgb_u8(91, 206, 250);
+let pink_color = Color::srgb_u8(245, 169, 184);
+
+let sections = sections!(<span color = { blue_color }> { "We" } </span> <span color = { pink_color }> { "now" } </span> <span color = { Color::WHITE }> { "have" } </span> <span color = { pink_color }> { "Color" } </span> <span color = { blue_color }> { "!" } </span>)
 ```
 
 > The default color should be set with [DefaultTextColor](https://github.com/Freyja-moth/bevy_html_lite/blob/main/src/plugin.rs#L24) when using DefaultHtmlLiteDisplayPlugin.
