@@ -1,9 +1,6 @@
 use std::{any::Any, fmt::Debug};
 
-use bevy::{
-    prelude::{Deref, Observer},
-    reflect::Reflect,
-};
+use bevy::{prelude::Observer, reflect::Reflect};
 use std::collections::HashMap;
 
 pub enum Attribute {
