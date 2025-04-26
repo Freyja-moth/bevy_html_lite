@@ -76,8 +76,13 @@ impl Section {
     }
 }
 
+<<<<<<< HEAD
 #[derive(Reflect, Debug)]
 pub struct Sections(Vec<Section>);
+=======
+#[derive(Reflect, DerefMut, Deref, Default, Debug)]
+pub struct Sections(pub Vec<Section>);
+>>>>>>> e529e6a314fe4da45cc5ec43a0f427f515bd2658
 impl FromIterator<Section> for Sections {
     fn from_iter<T: IntoIterator<Item = Section>>(iter: T) -> Self {
         Self(iter.into_iter().collect())
