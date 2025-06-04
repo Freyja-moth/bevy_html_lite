@@ -117,13 +117,13 @@ impl Parse for Sections {
     fn parse(input: ParseStream) -> syn::Result<Self> {
         let mut sections = vec![];
         let mut tags = vec![];
-        let mut attributes = HashMap::new();
+        let mut attributes = vec![HashMap::new()];
 
         while let Ok(word) = input.parse::<HtmlWord>() {
             match word {
                 HtmlWord::Tag(Tag::Start(start_tag, Attributes(tag_attributes))) => {
                     tags.push(start_tag);
-                    attributes = tag_attributes;
+                    attributes.push(tag_attributes);
                 }
                 HtmlWord::Tag(Tag::End(end_tag)) => {
                     let start_tag = tags
@@ -133,13 +133,17 @@ impl Parse for Sections {
                     if start_tag != end_tag {
                         return Err(syn::Error::new(end_tag.span(), "Mismatched tag"));
                     }
-                    attributes.drain();
+                    attributes.pop();
                 }
                 HtmlWord::Text(Text(text)) => {
                     sections.push(Section {
                         text,
                         tags: tags.clone(),
-                        attributes: attributes.clone(),
+                        attributes: attributes
+                            .iter()
+                            .flatten()
+                            .map(|(item, expr)| (item.clone(), expr.clone()))
+                            .collect(),
                     });
                 }
             }
