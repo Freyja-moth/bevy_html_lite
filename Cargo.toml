@@ -1,18 +1,18 @@
 [package]
 name = "bevy_html_lite"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 
 [workspace]
 members = [ "html_lite_sections", "html_lite_macros" ]
 
 [workspace.dependencies]
-bevy = "0.16.0"
+bevy = { version = "0.16.1", default-features = false }
 
 [dependencies]
-bevy = { version = "0.16.0", default-features = false }
-html_lite_macros = { version = "0.1.0", path = "html_lite_macros" }
-html_lite_sections = { version = "0.1.0", path = "html_lite_sections" }
+bevy = { version = "0.16.1", default-features = false }
+html_lite_macros = { version = "0.2.1", path = "html_lite_macros" }
+html_lite_sections = { version = "0.2.1", path = "html_lite_sections" }
 itertools = "0.14.0"
 
 [features]
