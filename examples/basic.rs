@@ -70,7 +70,7 @@ fn spawn_ui(mut commands: Commands) {
             (
                 Text::new("Press Space to say hi, and Backspace to clear the text!"),
                 TextColor(NORMAL_COLOR),
-                TextLayout::new_with_justify(Justify::Center),
+                TextLayout::new_with_justify(JustifyText::Center),
                 Node {
                     width: Val::Percent(100.),
                     ..Default::default()
