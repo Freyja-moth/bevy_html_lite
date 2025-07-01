@@ -3,5 +3,5 @@ name = "html_lite_sections"
 version = "0.2.1"
 edition = "2021"
 
-[dependencies]
-bevy.workspace = true
+[dependencies.bevy]
+workspace = true

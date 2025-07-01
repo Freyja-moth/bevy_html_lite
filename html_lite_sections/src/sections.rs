@@ -1,12 +1,7 @@
 use std::{any::Any, fmt::Debug};
 
-use bevy::{prelude::Observer, reflect::Reflect};
+use bevy::reflect::Reflect;
 use std::collections::HashMap;
-
-pub enum Attribute {
-    Observer(Observer),
-    String(String),
-}
 
 #[derive(Reflect, Default)]
 pub struct Section {

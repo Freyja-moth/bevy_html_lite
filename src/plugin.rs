@@ -57,7 +57,7 @@ impl Plugin for DefaultHtmlLiteDisplayPlugin {
 
 // Am I aware that this is a mess, yes, yes I am. Why haven't I fixed it? Tired.
 fn push_sections(
-    mut sections: Trigger<PushSections>,
+    mut sections: On<PushSections>,
     mut commands: Commands,
     fonts: Res<HtmlLiteFonts>,
     text_color: Res<DefaultTextColor>,
@@ -125,7 +125,7 @@ fn push_sections(
 }
 
 fn clear_sections(
-    _: Trigger<ClearSections>,
+    _: On<ClearSections>,
     mut commands: Commands,
     dialogue: Single<Entity, With<DialogueArea>>,
 ) {
