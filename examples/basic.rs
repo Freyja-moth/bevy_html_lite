@@ -6,13 +6,13 @@ const BACKGROUND_COLOR: Color = Color::srgb_u8(45, 35, 46);
 const NORMAL_COLOR: Color = Color::srgb_u8(106, 142, 174);
 const HOVERED_COLOR: Color = Color::srgb_u8(155, 209, 229);
 
-fn tada(_: On<Pointer<Click>>, mut commands: Commands) {
+fn tada(_: Trigger<Pointer<Click>>, mut commands: Commands) {
     commands.trigger(PushSections::new(sections!({ "Tada" })));
 }
 
 fn set_text_color_on<E: Reflect + Clone + Debug>(
     color: Color,
-) -> impl Fn(On<Pointer<E>>, Query<&mut TextColor>) -> Result<(), BevyError> {
+) -> impl Fn(Trigger<Pointer<E>>, Query<&mut TextColor>) -> Result<(), BevyError> {
     move |trigger, mut query| {
         let mut text_color = query.get_mut(trigger.target())?;
 
