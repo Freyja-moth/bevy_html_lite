@@ -1,10 +1,10 @@
 [package]
 name = "bevy_html_lite"
 version = "0.2.1"
-edition = "2021"
+edition = "2024"
 
 [dependencies]
-bevy = { version = "0.16.1", default-features = false }
+bevy = { version = "0.17.1", default-features = false }
 html_lite_macros = { version = "0.2.1", path = "html_lite_macros" }
 html_lite_sections = { version = "0.2.1", path = "html_lite_sections" }
 itertools = "0.14.0"
@@ -16,7 +16,7 @@ bevy = { workspace = true, default-features = true }
 members = [ "html_lite_sections", "html_lite_macros", "examples/*" ]
 
 [workspace.dependencies]
-bevy = { version = "0.16.1", default-features = false }
+bevy = { version = "0.17.1", default-features = false }
 
 [features]
 default = [ "plugin" ]
