@@ -6,15 +6,15 @@ const BACKGROUND_COLOR: Color = Color::srgb_u8(45, 35, 46);
 const NORMAL_COLOR: Color = Color::srgb_u8(106, 142, 174);
 const HOVERED_COLOR: Color = Color::srgb_u8(155, 209, 229);
 
-fn tada(_: Trigger<Pointer<Click>>, mut commands: Commands) {
+fn tada(_: On<Pointer<Click>>, mut commands: Commands) {
     commands.trigger(PushSections::new(sections!({ "Tada" })));
 }
 
 fn set_text_color_on<E: Reflect + Clone + Debug>(
     color: Color,
-) -> impl Fn(Trigger<Pointer<E>>, Query<&mut TextColor>) -> Result<(), BevyError> {
+) -> impl Fn(On<Pointer<E>>, Query<&mut TextColor>) -> Result<(), BevyError> {
     move |trigger, mut query| {
-        let mut text_color = query.get_mut(trigger.target())?;
+        let mut text_color = query.get_mut(trigger.entity)?;
 
         text_color.0 = color;
 
@@ -70,7 +70,7 @@ fn spawn_ui(mut commands: Commands) {
             (
                 Text::new("Press Space to say hi, and Backspace to clear the text!"),
                 TextColor(NORMAL_COLOR),
-                TextLayout::new_with_justify(JustifyText::Center),
+                TextLayout::new_with_justify(Justify::Center),
                 Node {
                     width: Val::Percent(100.),
                     ..Default::default()
