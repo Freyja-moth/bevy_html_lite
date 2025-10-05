@@ -14,7 +14,7 @@ fn set_text_color_on<E: Reflect + Clone + Debug>(
     color: Color,
 ) -> impl Fn(On<Pointer<E>>, Query<&mut TextColor>) -> Result<(), BevyError> {
     move |trigger, mut query| {
-        let mut text_color = query.get_mut(trigger.target())?;
+        let mut text_color = query.get_mut(trigger.entity)?;
 
         text_color.0 = color;
 
