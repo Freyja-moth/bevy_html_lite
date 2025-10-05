@@ -16,7 +16,7 @@ bevy = { workspace = true, default-features = true }
 members = [ "html_lite_sections", "html_lite_macros", "examples/*" ]
 
 [workspace.dependencies]
-bevy = { version = "0.17.1", default-features = false, features = [ "reflect_auto_register" ] }
+bevy = { git = "https://github.com/bevyengine/bevy", default-features = false, features = [ "reflect_auto_register" ] }
 
 [features]
 default = [ "plugin" ]
