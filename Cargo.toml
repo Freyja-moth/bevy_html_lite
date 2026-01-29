@@ -1,23 +1,30 @@
 [package]
 name = "bevy_html_lite"
-version = "0.3.0"
+version = "0.4.0"
 edition = "2024"
 
 [dependencies]
-bevy = { version = "0.17.1", default-features = false }
-html_lite_macros = { version = "0.2.1", path = "html_lite_macros" }
-html_lite_sections = { version = "0.2.1", path = "html_lite_sections" }
+bevy_ecs = { version = "0.18.0", optional = true }
+bevy_asset = { version = "0.18.0", optional = true }
+bevy_reflect = { workspace = true, optional = true }
+bevy_ui = { version = "0.18.0", optional = true }
+bevy_text = { version = "0.18.0", optional = true }
+bevy_app = { version = "0.18.0", optional = true }
+bevy_color = { version = "0.18.0", optional = true }
+
+html_lite_macros = { version = "0.4.0", path = "html_lite_macros" }
+html_lite_sections = { version = "0.4.0", path = "html_lite_sections" }
 itertools = "0.14.0"
 
 [dev-dependencies]
-bevy = { workspace = true, default-features = true }
+bevy = "0.18.0"
 
 [workspace]
-members = [ "html_lite_sections", "html_lite_macros", "examples/*" ]
+members = [ "html_lite_sections", "html_lite_macros" ] 
 
 [workspace.dependencies]
-bevy = { version = "0.17.1", default-features = false, features = [ "reflect_auto_register" ] }
+bevy_reflect = "0.18.0"
 
 [features]
 default = [ "plugin" ]
-plugin = [ "bevy/default_font", "bevy/bevy_asset", "bevy/bevy_color", "bevy/bevy_text", "bevy/bevy_ui" ]
+plugin = [ "bevy_ecs", "bevy_asset", "bevy_reflect", "bevy_ui", "bevy_text", "bevy_app", "bevy_color" ]

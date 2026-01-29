@@ -1,6 +1,6 @@
 use std::{any::Any, fmt::Debug};
 
-use bevy::reflect::Reflect;
+use bevy_reflect::Reflect;
 use std::collections::HashMap;
 
 #[derive(Reflect, Default)]

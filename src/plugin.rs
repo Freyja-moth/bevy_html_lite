@@ -1,6 +1,13 @@
 use crate::prelude::*;
-use bevy::prelude::*;
 use itertools::Itertools;
+
+use bevy_app::prelude::*;
+use bevy_asset::prelude::*;
+use bevy_color::prelude::*;
+use bevy_ecs::prelude::*;
+use bevy_reflect::prelude::*;
+use bevy_text::prelude::*;
+use bevy_ui::prelude::*;
 
 /// The dialogue area, all sections are added as children to this struct
 #[derive(Reflect, Component, Default, Debug)]
